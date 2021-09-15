@@ -1,5 +1,8 @@
 This module shall be placed under vtss_appl, i.e., vtss_appl/demo_snmp/
-
+ $ cd .../vtss_appl
+ $ git clone git@github.com:microchip/demo-apps-snmp demo_snmp
+ $ cd demo_snmp
+ $ git checkout 4.6
 
 Preparation:
 ------------
@@ -8,11 +11,16 @@ Goto the build directory. If you have not already setup a link 'config.mk', then
 'ln -s configs/ce_switch_caracal1_l10_ref.mk config.mk'.
 
 To make life easy, generate tags, i.e., 'make TAGS'. Then you have tags for the emacs
-editor. That will be usefull in the following.
+editor. That will be useful in the following.
 
 
 Build simple application:
 -------------------------
+(Note: The patch 'patch-snmp.patch' contain the changes that need to be done
+in the 2021.06 WebStaX file tree (item 2,3,4 below). The changes are described below,
+but if it is unclear what is done, then look in this patch file - alternatively
+simply apply it)
+
 1) cp module_demo_snmp.in ../../build/make/module_demo_snmp.in
 
 2) If the line 'Custom/AddModules =' does not exist in config.mk, then add the line
@@ -24,7 +32,7 @@ If you use tags in your editor, then search for VTSS_MODULE_ID_NONE.
 You will have to edit 3 places in this file. See the instructions just above
 VTSS_MODULE_ID_NONE in this file.
 
-4) Hook up the demo_snmp module with the Vitesse application, i.e., edit 
+4) Hook up the demo_snmp module with the WebStaX application, i.e., edit
 vtss_appl/main/main.c. Search for VTSS_SW_OPTION_HTTPS in that file,
 and do something similar, where you just change the HTTPS with DEMO_SNMP.
 Three thing must be done:
