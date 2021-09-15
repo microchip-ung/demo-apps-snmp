@@ -1,0 +1,47 @@
+This module shall be placed under vtss_appl, i.e., vtss_appl/demo_snmp/
+
+
+Preparation:
+------------
+Goto the build directory. If you have not already setup a link 'config.mk', then run
+'make' which will provide you with a list of posibilities. Choose one, e.g.,
+'ln -s configs/ce_switch_caracal1_l10_ref.mk config.mk'.
+
+To make life easy, generate tags, i.e., 'make TAGS'. Then you have tags for the emacs
+editor. That will be usefull in the following.
+
+
+Build simple application:
+-------------------------
+1) cp module_demo_snmp.in ../../build/make/module_demo_snmp.in
+
+2) If the line 'Custom/AddModules =' does not exist in config.mk, then add the line
+'Custom/AddModules = demo_snmp'. If it does exist, then add 'demo_snmp' to the end of the
+space seperated list, e.g., 'Custom/AddModules = xxx yyy demo_snmp'
+
+3) Add VTSS_MODULE_ID_DEMO_SNMP to vtss_appl/include/vtss/appl/vtss_module_id.h.
+If you use tags in your editor, then search for VTSS_MODULE_ID_NONE.
+You will have to edit 3 places in this file. See the instructions just above
+VTSS_MODULE_ID_NONE in this file.
+
+4) Hook up the demo_snmp module with the Vitesse application, i.e., edit 
+vtss_appl/main/main.c. Search for VTSS_SW_OPTION_HTTPS in that file,
+and do something similar, where you just change the HTTPS with DEMO_SNMP.
+Three thing must be done:
+ a) Include the demo_api.h if VTSS_SW_OPTION_DEMO_SNMP is defined.
+ b) Add the demo_init() function to the initfun[] list, if
+    VTSS_SW_OPTION_DEMO_SNMP is defined.
+
+5) In the build directory run 'make clobber'. This is because we have
+change the make system. And then run 'make -j' or just 'make'.
+
+6) Upload to code to the target.
+
+7) Check that you have a command i ICLI called:
+   # demo trap <number>
+   If not, you have not hooked up the demo_snmp module as described.
+
+8) Give the target an IP address and try 'http://<TARGET-IP-ADDRESS/VTSS-DEMO-MIB.mib
+   which should give you the DEMO SNMP MIB.
+
+9) Goto vtss_appl/demo_snmp/platform/demo_mib.cxx and read the description in the code.

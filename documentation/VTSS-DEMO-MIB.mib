@@ -1,0 +1,533 @@
+-- *****************************************************************
+-- DEMO-MIB:  Microsemi ENT private MIB
+-- ****************************************************************
+
+VTSS-DEMO-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    NOTIFICATION-GROUP, MODULE-COMPLIANCE, OBJECT-GROUP FROM SNMPv2-CONF
+    NOTIFICATION-TYPE, MODULE-IDENTITY, OBJECT-TYPE FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION FROM SNMPv2-TC
+    vtssSwitchMgmt FROM VTSS-SMI
+    Integer32 FROM SNMPv2-SMI
+    Unsigned32 FROM SNMPv2-SMI
+    TruthValue FROM SNMPv2-TC
+    VTSSInterfaceIndex FROM VTSS-TC
+    VTSSRowEditorState FROM VTSS-TC
+    ;
+
+vtssDemoMib MODULE-IDENTITY
+    LAST-UPDATED "201901010001Z"
+    ORGANIZATION
+        "Microsemi Corporation"
+    CONTACT-INFO
+        "Application support <ent.support@microsemi.com>"
+    DESCRIPTION
+        "Private DEMO MIB."
+    REVISION    "201901010001Z"
+    DESCRIPTION
+        "Fixed a typo and updated the description."
+    REVISION    "201901010000Z"
+    DESCRIPTION
+        "Initial version"
+    ::= { vtssSwitchMgmt 148 }
+
+
+vtssDemoMibObjects OBJECT IDENTIFIER
+    ::= { vtssDemoMib 1 }
+
+vtssDemoStatus OBJECT IDENTIFIER
+    ::= { vtssDemoMibObjects 1 }
+
+vtssDemoEx1 OBJECT IDENTIFIER
+    ::= { vtssDemoStatus 1 }
+
+vtssDemoEx1Attr1 OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 1 which is a booleanTRUE - something, FALSE - something else."
+    ::= { vtssDemoEx1 1 }
+
+vtssDemoEx1Attr2 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 2 is an uint32"
+    ::= { vtssDemoEx1 2 }
+
+vtssDemoEx2 OBJECT IDENTIFIER
+    ::= { vtssDemoStatus 2 }
+
+vtssDemoEx2Aaaa OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "bbbb"
+    ::= { vtssDemoEx2 10 }
+
+vtssDemoEx3Table OBJECT-TYPE
+    SYNTAX      SEQUENCE OF VTSSDemoEx3Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "This is a demonstration of the simples posible table. It uses an
+         integer as index, and each table item contains two numbers."
+    ::= { vtssDemoStatus 3 }
+
+vtssDemoEx3Entry OBJECT-TYPE
+    SYNTAX      VTSSDemoEx3Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The index is a number 0,...,5 in that order."
+    INDEX       { vtssDemoEx3Index3 }
+    ::= { vtssDemoEx3Table 1 }
+
+VTSSDemoEx3Entry ::= SEQUENCE {
+    vtssDemoEx3Index3     Integer32,
+    vtssDemoEx3Attr1_Ex3  Integer32,
+    vtssDemoEx3Attr2_Ex3  Integer32
+}
+
+vtssDemoEx3Index3 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx3Entry 1 }
+
+vtssDemoEx3Attr1_Ex3 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 1 which is an int"
+    ::= { vtssDemoEx3Entry 2 }
+
+vtssDemoEx3Attr2_Ex3 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 2 is an uint32"
+    ::= { vtssDemoEx3Entry 3 }
+
+vtssDemoEx4Table OBJECT-TYPE
+    SYNTAX      SEQUENCE OF VTSSDemoEx4Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "This is demonstration of a table that use ifIndex as index"
+    ::= { vtssDemoStatus 4 }
+
+vtssDemoEx4Entry OBJECT-TYPE
+    SYNTAX      VTSSDemoEx4Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "Each interface has a set of parameters"
+    INDEX       { vtssDemoEx4IfIndex }
+    ::= { vtssDemoEx4Table 1 }
+
+VTSSDemoEx4Entry ::= SEQUENCE {
+    vtssDemoEx4IfIndex  VTSSInterfaceIndex,
+    vtssDemoEx4Aaa1a    Integer32,
+    vtssDemoEx4Aaa2a    Integer32
+}
+
+vtssDemoEx4IfIndex OBJECT-TYPE
+    SYNTAX      VTSSInterfaceIndex
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx4Entry 1 }
+
+vtssDemoEx4Aaa1a OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "bbb1b"
+    ::= { vtssDemoEx4Entry 12 }
+
+vtssDemoEx4Aaa2a OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "bbb2b"
+    ::= { vtssDemoEx4Entry 13 }
+
+vtssDemoEx5Table OBJECT-TYPE
+    SYNTAX      SEQUENCE OF VTSSDemoEx5Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "This is demonstration of a table that use ifIndex as index"
+    ::= { vtssDemoStatus 5 }
+
+vtssDemoEx5Entry OBJECT-TYPE
+    SYNTAX      VTSSDemoEx5Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "Each interface has a set of parameters"
+    INDEX       { vtssDemoEx5I1, vtssDemoEx5I2, vtssDemoEx5I3 }
+    ::= { vtssDemoEx5Table 1 }
+
+VTSSDemoEx5Entry ::= SEQUENCE {
+    vtssDemoEx5I1         Integer32,
+    vtssDemoEx5I2         Integer32,
+    vtssDemoEx5I3         Integer32,
+    vtssDemoEx5Attr1_Ex5  Integer32,
+    vtssDemoEx5Attr2_Ex5  Integer32
+}
+
+vtssDemoEx5I1 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx5Entry 1 }
+
+vtssDemoEx5I2 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx5Entry 2 }
+
+vtssDemoEx5I3 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx5Entry 3 }
+
+vtssDemoEx5Attr1_Ex5 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 1 which is an int"
+    ::= { vtssDemoEx5Entry 4 }
+
+vtssDemoEx5Attr2_Ex5 OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 2 is an uint32"
+    ::= { vtssDemoEx5Entry 5 }
+
+vtssDemoEx6Table OBJECT-TYPE
+    SYNTAX      SEQUENCE OF VTSSDemoEx6Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "This table provides link-layer status information for IP interfaces."
+    ::= { vtssDemoStatus 6 }
+
+vtssDemoEx6Entry OBJECT-TYPE
+    SYNTAX      VTSSDemoEx6Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "Each entry in this table represents an IP interface."
+    INDEX       { vtssDemoEx6Index }
+    ::= { vtssDemoEx6Table 1 }
+
+VTSSDemoEx6Entry ::= SEQUENCE {
+    vtssDemoEx6Index      Integer32,
+    vtssDemoEx6Attr1_Ex6  Unsigned32,
+    vtssDemoEx6Attr2_Ex6  Unsigned32
+}
+
+vtssDemoEx6Index OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx6Entry 0 }
+
+vtssDemoEx6Attr1_Ex6 OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Attribute 1 which is an int"
+    ::= { vtssDemoEx6Entry 1 }
+
+vtssDemoEx6Attr2_Ex6 OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Attribute 2 is an uint32"
+    ::= { vtssDemoEx6Entry 2 }
+
+vtssDemoEx7Table OBJECT-TYPE
+    SYNTAX      SEQUENCE OF VTSSDemoEx7Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "Example 7 table description."
+    ::= { vtssDemoStatus 70 }
+
+vtssDemoEx7Entry OBJECT-TYPE
+    SYNTAX      VTSSDemoEx7Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "Example 7 index description."
+    INDEX       { vtssDemoEx7Index }
+    ::= { vtssDemoEx7Table 1 }
+
+VTSSDemoEx7Entry ::= SEQUENCE {
+    vtssDemoEx7Index      Integer32,
+    vtssDemoEx7Attr1_Ex7  Unsigned32,
+    vtssDemoEx7Attr2_Ex7  Unsigned32,
+    vtssDemoEx7Action     VTSSRowEditorState
+}
+
+vtssDemoEx7Index OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx7Entry 1 }
+
+vtssDemoEx7Attr1_Ex7 OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 1 which is an int"
+    ::= { vtssDemoEx7Entry 2 }
+
+vtssDemoEx7Attr2_Ex7 OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 2 is an uint32"
+    ::= { vtssDemoEx7Entry 3 }
+
+vtssDemoEx7Action OBJECT-TYPE
+    SYNTAX      VTSSRowEditorState
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Action"
+    ::= { vtssDemoEx7Entry 123 }
+
+vtssDemoEx7TableRowEditor OBJECT IDENTIFIER
+    ::= { vtssDemoStatus 71 }
+
+vtssDemoEx7TableRowEditorIndex OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "The index of logical interface."
+    ::= { vtssDemoEx7TableRowEditor 1 }
+
+vtssDemoEx7TableRowEditorAttr1_Ex7 OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 1 which is an int"
+    ::= { vtssDemoEx7TableRowEditor 2 }
+
+vtssDemoEx7TableRowEditorAttr2_Ex7 OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Attribute 2 is an uint32"
+    ::= { vtssDemoEx7TableRowEditor 3 }
+
+vtssDemoEx7TableRowEditorAction OBJECT-TYPE
+    SYNTAX      VTSSRowEditorState
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "Action"
+    ::= { vtssDemoEx7TableRowEditor 123 }
+
+vtssDemoTrap OBJECT IDENTIFIER
+    ::= { vtssDemoMibObjects 2 }
+
+vtssDemoEx2Trap NOTIFICATION-TYPE
+    OBJECTS     { vtssDemoEx2Aaaa }
+    STATUS      current
+    DESCRIPTION
+        "This trap signals that one or more of the objects included in the trap
+         has been updated."
+
+    ::= { vtssDemoTrap 20 }
+
+vtssDemoEx6TrapAdd NOTIFICATION-TYPE
+    OBJECTS     { vtssDemoEx6Index, vtssDemoEx6Attr1_Ex6,
+                  vtssDemoEx6Attr2_Ex6 }
+    STATUS      current
+    DESCRIPTION
+        "This trap signals that a row has been added. The index(es) and value(s)
+         of the row is included in the trap."
+
+    ::= { vtssDemoTrap 60 }
+
+vtssDemoEx6TrapMod NOTIFICATION-TYPE
+    OBJECTS     { vtssDemoEx6Index, vtssDemoEx6Attr1_Ex6,
+                  vtssDemoEx6Attr2_Ex6 }
+    STATUS      current
+    DESCRIPTION
+        "This trap signals that one or more of the objects included in the trap
+          has been updated."
+
+    ::= { vtssDemoTrap 61 }
+
+vtssDemoEx6TrapDel NOTIFICATION-TYPE
+    OBJECTS     { vtssDemoEx6Index }
+    STATUS      current
+    DESCRIPTION
+        "This trap signals that a row has been deleted. The index(es) of the
+         row is included in the trap."
+
+    ::= { vtssDemoTrap 63 }
+
+vtssDemoMibConformance OBJECT IDENTIFIER
+    ::= { vtssDemoMib 2 }
+
+vtssDemoMibCompliances OBJECT IDENTIFIER
+    ::= { vtssDemoMibConformance 1 }
+
+vtssDemoMibGroups OBJECT IDENTIFIER
+    ::= { vtssDemoMibConformance 2 }
+
+vtssDemoEx1InfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx1Attr1, vtssDemoEx1Attr2 }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 1 }
+
+vtssDemoEx2InfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx2Aaaa }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 2 }
+
+vtssDemoEx3TableInfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx3Index3, vtssDemoEx3Attr1_Ex3,
+                  vtssDemoEx3Attr2_Ex3 }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 3 }
+
+vtssDemoEx4TableInfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx4IfIndex, vtssDemoEx4Aaa1a,
+                  vtssDemoEx4Aaa2a }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 4 }
+
+vtssDemoEx5TableInfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx5I1, vtssDemoEx5I2, vtssDemoEx5I3,
+                  vtssDemoEx5Attr1_Ex5, vtssDemoEx5Attr2_Ex5 }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 5 }
+
+vtssDemoEx6TableInfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx6Index, vtssDemoEx6Attr1_Ex6,
+                  vtssDemoEx6Attr2_Ex6 }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 6 }
+
+vtssDemoEx7TableInfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx7Index, vtssDemoEx7Attr1_Ex7,
+                  vtssDemoEx7Attr2_Ex7, vtssDemoEx7Action }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 7 }
+
+vtssDemoEx7TableRowEditorInfoGroup OBJECT-GROUP
+    OBJECTS     { vtssDemoEx7TableRowEditorIndex,
+                  vtssDemoEx7TableRowEditorAttr1_Ex7,
+                  vtssDemoEx7TableRowEditorAttr2_Ex7,
+                  vtssDemoEx7TableRowEditorAction }
+    STATUS      current
+    DESCRIPTION
+        "A collection of objects."
+    ::= { vtssDemoMibGroups 8 }
+
+vtssDemoEx2TrapInfoGroup NOTIFICATION-GROUP
+    NOTIFICATIONS { vtssDemoEx2Trap }
+    STATUS      current
+    DESCRIPTION
+        "Information group containing a trap."
+    ::= { vtssDemoMibGroups 9 }
+
+vtssDemoEx6TrapAddInfoGroup NOTIFICATION-GROUP
+    NOTIFICATIONS { vtssDemoEx6TrapAdd }
+    STATUS      current
+    DESCRIPTION
+        "Information group containing a trap."
+    ::= { vtssDemoMibGroups 10 }
+
+vtssDemoEx6TrapModInfoGroup NOTIFICATION-GROUP
+    NOTIFICATIONS { vtssDemoEx6TrapMod }
+    STATUS      current
+    DESCRIPTION
+        "Information group containing a trap."
+    ::= { vtssDemoMibGroups 11 }
+
+vtssDemoEx6TrapDelInfoGroup NOTIFICATION-GROUP
+    NOTIFICATIONS { vtssDemoEx6TrapDel }
+    STATUS      current
+    DESCRIPTION
+        "Information group containing a trap."
+    ::= { vtssDemoMibGroups 12 }
+
+vtssDemoMibCompliance MODULE-COMPLIANCE
+    STATUS      current
+    DESCRIPTION
+        "The compliance statement for the implementation."
+
+    MODULE      -- this module
+
+    MANDATORY-GROUPS { vtssDemoEx1InfoGroup, vtssDemoEx2InfoGroup,
+                       vtssDemoEx3TableInfoGroup,
+                       vtssDemoEx4TableInfoGroup,
+                       vtssDemoEx5TableInfoGroup,
+                       vtssDemoEx6TableInfoGroup,
+                       vtssDemoEx7TableInfoGroup,
+                       vtssDemoEx7TableRowEditorInfoGroup,
+                       vtssDemoEx2TrapInfoGroup,
+                       vtssDemoEx6TrapAddInfoGroup,
+                       vtssDemoEx6TrapModInfoGroup,
+                       vtssDemoEx6TrapDelInfoGroup }
+
+    ::= { vtssDemoMibCompliances 1 }
+
+END

@@ -1,0 +1,78 @@
+########################################################-*- mode: Makefile -*-
+#
+# Vitesse Switch Software.
+#
+# Copyright (c) 2002-2013 Vitesse Semiconductor Corporation "Vitesse". All
+# Rights Reserved.
+#
+# Unpublished rights reserved under the copyright laws of the United States of
+# America, other countries and international treaties. Permission to use, copy,
+# store and modify, the software and its source code is granted. Permission to
+# integrate into other products, disclose, transmit and distribute the software
+# in an absolute machine readable format (e.g. HEX file) is also granted.  The
+# source code of the software may not be disclosed, transmitted or distributed
+# without the written permission of Vitesse. The software and its source code
+# may only be used in products utilizing the Vitesse switch products.
+#
+# This copyright notice must appear in any copy, modification, disclosure,
+# transmission or distribution of the software. Vitesse retains all ownership,
+# copyright, trade secret and proprietary rights in the software.
+#
+# THIS SOFTWARE HAS BEEN PROVIDED "AS IS," WITHOUT EXPRESS OR IMPLIED WARRANTY
+# INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR USE AND NON-INFRINGEMENT.
+#
+# ------------------------------------------------------------------------
+DIR_demo_snmp          := $(DIR_APPL)/demo_snmp
+DIR_demo_snmp_base     := $(DIR_demo_snmp)/base
+DIR_demo_snmp_base_src := $(DIR_demo_snmp)/base/src
+DIR_demo_snmp_base_inc := $(DIR_demo_snmp)/base/include
+DIR_demo_snmp_platform := $(DIR_demo_snmp)/platform
+DIR_demo_snmp_html     := $(DIR_demo_snmp_platform)/html
+
+#MODULE_ID_demo_snmp := VTSS_MODULE_ID_DEMO_SNMP
+MODULE_ID_demo_snmp := 148
+
+OBJECTS_demo_snmp_base  :=
+
+OBJECTS_demo_snmp_platform_cxx := demo_mib.o \
+				  demo_json.o \
+				  demo_attributes.o \
+				  demo.o
+
+OBJECTS_demo_snmp_platform_c :=	
+#$(call if-module,json_rpc,    demo_json.o)
+
+OBJECTS_demo_snmp := $(OBJECTS_demo_platform) $(OBJECTS_demo_snmp_base) $(OBJECTS_demo_snmp_platform_cxx)
+
+# Built-in ICLI
+$(eval $(call if-module,demo_snmp,$(call if-module,icli,$(call add_icli,$(MODULE_ID_demo_snmp),$(DIR_demo_snmp_platform)/demo.icli))))
+
+$(OBJECTS_demo_snmp_platform): %.o: $(DIR_demo_snmp_platform)/%.c
+	$(call compile_cxx,$(MODULE_ID_demo_snmp), $@, $<)
+
+$(OBJECTS_demo_snmp_base): %.o: $(DIR_demo_snmp_base_src)/%.c
+	$(call compile_cxx,$(MODULE_ID_demo_snmp), $@, $<)
+
+$(OBJECTS_demo_snmp_platform_cxx): %.o: $(DIR_demo_snmp_platform)/%.cxx
+	$(call compile_cxx,$(MODULE_ID_demo_snmp), $@, $<)
+
+# Include files
+INCLUDES += -I$(DIR_demo_snmp_platform) -I$(DIR_demo_snmp_base_inc)
+
+# Web Content Generation
+#WEB_CONTENT += $(DIR_demo_snmp_html)
+
+# Files to be linted
+LINT_FILES_demo_snmp += $(addprefix $(DIR_demo_snmp_base_src)/,$(OBJECTS_demo_snmp_base:.o=.c)) $(addprefix $(DIR_demo_snmp_platform)/,$(OBJECTS_demo_snmp_platform:.o=.c))
+
+# Code style files
+#VTSS_CODE_STYLE_CHK_FILES_demo_snmp += $(DIR_demo_snmp_base_src)/*.c $(DIR_demo_snmp_base_inc)/*.h $(DIR_demo_snmp_platform)/*.c $(DIR_demo_snmp_platform)/*.h
+VTSS_CODE_STYLE_CHK_FILES_demo_snmp +=  $(DIR_demo_snmp_platform)/*.c $(DIR_demo_snmp_platform)/*.h
+
+# Tidy files
+#TIDY_FILES_demo_snmp += $(DIR_demo_snmp_html)/*.htm $(DIR_demo_snmp_html)/help/*.htm
+
+# JSlint files
+#JSLINT_FILES_demo_snmp += $(TIDY_FILES_demo_snmp)
+
