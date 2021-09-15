@@ -8,7 +8,7 @@ Preparation:
 ------------
 Goto the build directory. If you have not already setup a link 'config.mk', then run
 'make' which will provide you with a list of posibilities. Choose one, e.g.,
-'ln -s configs/ce_switch_caracal1_l10_ref.mk config.mk'.
+ $ tools/set_build_config.rb -c configs/istax_multi.mk -s istax_jr2_24
 
 To make life easy, generate tags, i.e., 'make TAGS'. Then you have tags for the emacs
 editor. That will be useful in the following.
@@ -19,7 +19,10 @@ Build simple application:
 (Note: The patch 'patch-snmp.patch' contain the changes that need to be done
 in the 2021.06 WebStaX file tree (item 2,3,4 below). The changes are described below,
 but if it is unclear what is done, then look in this patch file - alternatively
-simply apply it)
+simply apply it, which is done with
+ $ cd <webstax-root>
+ $ patch -p1 < vtss_appl/demo_snmp/patch-snmp.patch
+)
 
 1) cp module_demo_snmp.in ../../build/make/module_demo_snmp.in
 
