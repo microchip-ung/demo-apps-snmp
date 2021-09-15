@@ -17,7 +17,7 @@ editor. That will be useful in the following.
 Build simple application:
 -------------------------
 (Note: The patch 'patch-snmp.patch' contain the changes that need to be done
-in the 2021.06 WebStaX file tree (item 2,3,4 below). The changes are described below,
+in the 4.6 WebStaX file tree (item 2,3,4 below). The changes are described below,
 but if it is unclear what is done, then look in this patch file - alternatively
 simply apply it)
 
