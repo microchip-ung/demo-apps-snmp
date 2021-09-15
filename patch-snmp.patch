@@ -1,32 +1,32 @@
 diff --git a/build/configs/istax_multi.mk b/build/configs/istax_multi.mk
-index 0f5bae9..9039139 100644
+index fbaff9c..fd587a7 100644
 --- a/build/configs/istax_multi.mk
 +++ b/build/configs/istax_multi.mk
-@@ -52,6 +52,7 @@ ISTAX_PROFILE_LIST = \
- 
- # To enable Private MIBs, comment in the following line:
- # Custom/AddModules := private_mib private_mib_gen
-+Custom/AddModules := demo_snmp
+@@ -54,6 +54,7 @@ ISTAX_PROFILE_LIST =        \
+     sparxIV_90_48           \
  
  # Custom/Stage2 := debug
++Custom/AddModules := demo_snmp
  
+ # DefineTargetByPackage($1,$2)
+ # $1: package name
 diff --git a/vtss_appl/include/vtss/appl/module_id.h b/vtss_appl/include/vtss/appl/module_id.h
-index 1cf7a25..c2dc1e7 100644
+index 02620be..7bc4acab 100644
 --- a/vtss_appl/include/vtss/appl/module_id.h
 +++ b/vtss_appl/include/vtss/appl/module_id.h
-@@ -203,6 +203,7 @@ enum {
-     VTSS_MODULE_ID_DHCP6_RELAY          = 145,
-     VTSS_MODULE_ID_DHCP6_SNOOPING       = 146,
-     VTSS_MODULE_ID_IPV6_SOURCE_GUARD    = 147,
-+    VTSS_MODULE_ID_DEMO_SNMP            = 148,
+@@ -212,6 +212,7 @@ enum {
+     VTSS_MODULE_ID_FRER                 = 157,
+     VTSS_MODULE_ID_KR                   = 158,
+     VTSS_MODULE_ID_IEC_MRP              = 159,
++    VTSS_MODULE_ID_DEMO_SNMP            = 160,
  
      /*
       * INSERT NEW MODULE IDS HERE. AND ONLY HERE!!!
 diff --git a/vtss_appl/main/main.cxx b/vtss_appl/main/main.cxx
-index 941d377..5bcaeeb 100644
+index b2ec0df..d2b0fb5 100644
 --- a/vtss_appl/main/main.cxx
 +++ b/vtss_appl/main/main.cxx
-@@ -477,6 +477,10 @@
+@@ -476,6 +476,10 @@
  #include "vtss_optional_modules_api.h"
  #endif
  
@@ -37,37 +37,36 @@ index 941d377..5bcaeeb 100644
  #if defined(CYGPKG_IO_FILEIO) && defined(CYGPKG_FS_RAM) && defined(VTSS_SW_OPTION_ICFG)
  #include <unistd.h>
  #include <cyg/fileio/fileio.h>
-@@ -915,6 +919,10 @@ static struct {
-     INITFUN(vtss_optional_modules_init)
+@@ -902,6 +906,9 @@ static struct {
+ #ifdef VTSS_SW_OPTION_PSFP
+     INITFUN(psfp_init)
  #endif
- 
-+#if defined(VTSS_SW_OPTION_DEMO_SNMP)
++#ifdef VTSS_SW_OPTION_DEMO_SNMP
 +    INITFUN(demo_init)
 +#endif
-+
+ 
  // **** NOTE: vtss_icfg_late_init must be last in this list ****
  #ifdef VTSS_SW_OPTION_ICFG
-     INITFUN(vtss_icfg_late_init)
 diff --git a/vtss_appl/util/vtss_module_id.cxx b/vtss_appl/util/vtss_module_id.cxx
-index 708b2a9..a645e03 100644
+index e74c260..dc53567 100644
 --- a/vtss_appl/util/vtss_module_id.cxx
 +++ b/vtss_appl/util/vtss_module_id.cxx
-@@ -181,6 +181,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
-     [VTSS_MODULE_ID_DHCP6_RELAY]      /* 145 */ = "DHCPv6Relay",
-     [VTSS_MODULE_ID_DHCP6_SNOOPING]   /* 146 */ = "DHCPv6_Snooping",
-     [VTSS_MODULE_ID_IPV6_SOURCE_GUARD] /*147 */ = "IPv6_Source_Guard",
-+    [VTSS_MODULE_ID_DEMO_SNMP]        /* 148 */ = "DEMO_SNMP",
+@@ -191,6 +191,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
+     [VTSS_MODULE_ID_FRER]                  /* 157 */ = "FRER",
+     [VTSS_MODULE_ID_KR]                    /* 158 */ = "KR",
+     [VTSS_MODULE_ID_IEC_MRP]               /* 159 */ = "IEC_MRP",
++    [VTSS_MODULE_ID_DEMO_SNMP]             /* 160 */ = "DEMO_SNMP",
  
      /* Add new module name above it. And please don't use space
         in module name, use underscore instead. */
-@@ -555,6 +556,11 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
-     /*[VTSS_MODULE_ID_DHCP6_RELAY]      145 */ 1,
-     /*[VTSS_MODULE_ID_DHCP6_SNOOPING]   146 */ 1,
-     /*[VTSS_MODULE_ID_IPV6_SOURCE_GUARD] 147 */ 1,
+@@ -541,6 +542,11 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
+     /*[VTSS_MODULE_ID_FRER]                  157 */ 1,
+     /*[VTSS_MODULE_ID_KR]                    158 */ 1,
+     /*[VTSS_MODULE_ID_IEC_MRP]               159 */ 1,
 +#ifdef VTSS_SW_OPTION_DEMO_SNMP
-+    /*[VTSS_MODULE_ID_DEMO_SNMP         148 */ 0,
++    /*[VTSS_MODULE_ID_DEMO_SNMP]             160 */ 0,
 +#else
-+    /*[VTSS_MODULE_ID_DEMO_SNMP]        148 */ 1,
++    /*[VTSS_MODULE_ID_DEMO_SNMP]             160 */ 1,
 +#endif
  
      /* Hint:

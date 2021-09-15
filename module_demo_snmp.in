@@ -31,7 +31,7 @@ DIR_demo_snmp_platform := $(DIR_demo_snmp)/platform
 DIR_demo_snmp_html     := $(DIR_demo_snmp_platform)/html
 
 #MODULE_ID_demo_snmp := VTSS_MODULE_ID_DEMO_SNMP
-MODULE_ID_demo_snmp := 148
+MODULE_ID_demo_snmp := 160
 
 OBJECTS_demo_snmp_base  :=
 

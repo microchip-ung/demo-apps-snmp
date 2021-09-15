@@ -281,7 +281,8 @@ mesa_rc demo_ex5_itr(const demo_ex5_index1_t  *prev_i1,
 // (6) ------ Example 6 ------
 
 vtss::expose::TableStatus<vtss::expose::ParamKey<demo_ex6_index_t>,
-                          vtss::expose::ParamVal<demo_ex6_attr_t *>> demo_ex6_status;
+                          vtss::expose::ParamVal<demo_ex6_attr_t *>> demo_ex6_status("mutex_ex6_status",
+										     VTSS_MODULE_ID_DEMO_SNMP);
 
 
 mesa_rc demo_ex6_set(demo_ex6_index_t  index,

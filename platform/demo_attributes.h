@@ -1,7 +1,7 @@
 #ifndef _DEMO_ATTRIBUTES_H_
 #define _DEMO_ATTRIBUTES_H_
 
-#include <mscc/ethernet/switch/api/types.h>
+//#include <mscc/ethernet/switch/api/types.h>
 #include <vtss/appl/interface.h>
 #include <vtss/basics/enum-descriptor.h>
 #include <vtss/basics/expose.hxx>
