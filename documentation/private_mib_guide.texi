@@ -1,0 +1,24 @@
+\input texinfo
+
+@set UPDATED January 31th, 2019
+@set EDITION 0.1
+@set VERSION 4.6
+
+
+@setfilename info-main
+@settitle name-main
+
+@titlepage
+@titlefont{@emph{Microchip}}
+@sp 1
+@title SNMP/JSON Programmers Guide
+@subtitle for release @value{VERSION}
+@subtitle @value{UPDATED}
+
+@end titlepage
+@paragraphindent none
+@setcontentsaftertitlepage
+@include private_mib_guide.toc
+@include snmp_demo.texi
+
+@bye

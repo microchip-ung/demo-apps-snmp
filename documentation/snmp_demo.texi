@@ -1,0 +1,326 @@
+@chapter Private MIB top-down
+
+In order to follow this description, you should have the snmp demo files which is available as a
+demo_snmp.tar.gz file.
+It shall be unpacked in the @file{vtss_appl} directory, i.e.
+@verbatim
+ $ cd .../vtss_appl
+ $ tar xzf demo_snmp.tar.gz
+@end verbatim
+Then there should be a directory called @file{vtss_appl/demo_snmp}.
+
+This code illustrate 5 examples
+@itemize
+@item Ex1 with a single get/set attribute
+@item Ex2 with a single get attribute with a trap
+@item Ex3 a simple table with an integer index
+@item Ex4 a simple table with an ifIndex index
+@item Ex5 a table with 3 index attributes
+@item Ex6 a table that emit traps on add, delete and modify operations
+@item Ex7 a table that is can be written to from SNMP
+@end itemize
+For tables, example 3 is the main example. It is not more complicated than it need to be.
+If this example is understood, then example 4 and 5 are the same thing, with a bit more
+details, which would be confusing to learn in a first round.
+
+@section Introduction to the examples
+In the @file{demo_mib.cxx} the hook-up to SNMP is done@footnote{There is a similar hook-up for JSON in @file{demo_json.cxx} which is quite similar, but we will use SNMP as the example for now.}. Search for @code{_demo_ex1}.
+This object represent the SNMP object
+that is a simple get/set attribute. The actual implementation of the attribute is done in @code{DemoEx1},
+which the class template used to define @code{_demo_ex1} is a parameter to.
+In the next section we will look at how that is supposed to be done.
+For now we assume it is done, and just focus at how the attribute comes into the SNMP tree.
+
+If we look at the important code for locating our object in the SNMP tree
+it will look like this
+
+@verbatim
+ VTSS_MIB_MODULE("DemoMib", "DEMO", demo_mib_init, VTSS_MODULE_ID_DEMO_SNMP,
+                 demo_root, h) {...}
+ NS(demo_mib_objects, demo_root, 11, "DemoMibObjects");
+ NS(demo_status,    demo_mib_objects, 13, "DemoStatus");
+ static StructRW2<DemoEx1>       _demo_ex1(
+      &demo_status, expose::snmp::OidElement(17, "DemoEx1"));
+@end verbatim
+then the @code{OID} of @code{_demo_ex1} will be
+@verbatim
+ enterprises.vtss.vtssSwitchMgmt.<VTSS_MODULE_ID_DEMO_SNMP>.11.13.17
+@end verbatim
+where @code{vtss} and @code{vtssSwitchMgmt} is defined in @file{VTSS-SMI.mib} which can be found in
+@file{vtss_appl/snmp/mibs/}.
+
+If @code{VTSS_MODULE_ID_DEMO_SNMP} is defined to @code{148} in @file{vtss_appl/include/vtss/appl/module_id.h}, the @code{OID}
+of @code{_demo_ex1} will be @code{enterprise.6603.1.148.11.13.17}.
+
+In the actual file the numbers 11, 13 and 17 are
+1,1 and 1, but in order to illustrate which number that goes where, I have changed them to the 3 prime numbers above. From now on they will be one's.
+
+The @code{_demo_ex1} is only the name of this object in the C code. And if you look it is not references from anywhere.
+The name of this object in SNMP context is @code{vtssDemoEx1}, which is the second parameter in the @code{OidElement()} object
+which is given as parameter in the definition of @code{_demo_ex1} with a pre-pended @code{vtss}. The SNMP MIB will wrt this
+then look like this, where I have left out the parameters in each definition
+@verbatim
+ vtssDemoMib MODULE-IDENTITY
+ ::= { vtssSwitchMgmt 148 }
+ 
+ vtssDemoMibObjects OBJECT IDENTIFIER
+ ::= { vtssDemoMib 1 }
+ 
+ vtssDemoStatus OBJECT IDENTIFIER
+ ::= { vtssDemoMibObjects 1 }
+ 
+ vtssDemoEx1 OBJECT IDENTIFIER
+ ::= { vtssDemoStatus 1 }
+@end verbatim
+
+One more important thing to notis is the @code{demo_mib_init} in @code{VTSS_MIB_MODULE}. This is the name of the
+init function which must be called in order to register the MIB. In @file{demo.cxx} it is shown how it is called.
+
+@section Implementation of DemoEx1
+The implementation of @code{DemoEx1} can be found in @file{demo_serializer.hxx}.
+
+First the type @code{P} is defined from the template @code{ParamList}. In our case this template
+has only one argument namely @code{ParamVal<demo_ex1_attr_t *>}, but it can have any number@footnote{Any number means at the most 16.}. For each argument there must be a @code{VTSS_EXPOSE_SERIALIZE_ARG_<N>} where @code{<N>} is the argument in @code{ParamList} to which the definition apply. In this case we have only @code{VTSS_EXPOSE_SERIALIZE_ARG_1(demo_ex1_attr_t &i} which
+expand to
+@verbatim
+ template <typename HANDLER>
+ void argument(HANDLER &h, ::vtss::expose::arg::_1, demo_ex1_attr_t &i)
+ {
+   // BODY of VTSS_EXPOSE_SERIALIZE_ARG_1 which is
+   h.argument_properties(vtss::expose::snmp::OidOffset(1));
+   serialize(h, i);
+ }
+@end verbatim
+
+The @code{h} object is supposed to implement different methods. Above is can be seen, that @code{argument_properties()}
+must exist. In this specific case the offset @code{OID} of the SNMP attribute that is object implement. In the
+@code{serialize()} function, which also is located in this file. In this function everything is more or less about
+doing something to @code{h}. In order to do this, we must know what @code{HANDLER} in @code{argument()} is.
+
+The
+@verbatim
+ VTSS_EXPOSE_GET_PTR(demo_ex1_get);
+@end verbatim
+expand to
+@verbatim
+ static constexpr mesa_rc (*get)(demo_ex1_attr_t *) = demo_ex1_get;
+@end verbatim
+It can be difficult to follow the implementation to see this, but it should not be necesssary either.
+A similar thing apply to the set function. These function are made available in the @code{DemoEx1} class just like the
+@code{argument()} method that we looked at earlier. So this is what is made available to the SNMP interface in
+@file{demo_mip.cxx} that we started with.
+
+As can be seen, the @code{argument()} function must be given the value of the attribute and does then specify
+how it shall be presented. The @code{get()} and @code{set()} functions can provide the value.
+
+
+@section Implementation of DemoEx2
+This is an example of an attribute, just like DemoEx1, which also is associated with a trap.
+The attribute is read-only from a management point of view. In this example the value can be changed with an ICLI
+command, namely
+@verbatim
+ # demo ex2 set <number>
+@end verbatim
+That will set the value of this attribute to @code{<number>} and emit a trap if the value has changed.
+Comparing this example with DemoEx1, it should be obvious what is needed in order to add trap support.
+As an exercise you could try to do that for DemoEx1.
+
+@section Implementation of DemoEx3
+This is an example of a table with two values per table entry and indexed with an integer.
+
+@section Implementation of DemoEx4
+This is an example is similar to DemoEx3, but now the index is @code{ifIndex}.
+
+@section Implementation of DemoEx5
+This is an example is similar to DemoEx3, but now the index is a 3 dimentional.
+So this illustrate how iterators over many keys are aggregated.
+
+@section Implementation of DemoEx6
+This is an example of a table into which you can add, delete and modify values.
+The object @code{demo_ex6_status} is registered with this table in @file{demo_mib.cxx}.
+Initially the table is empty, but values can be added or modified with the objects @code{set()} methos.
+And table rows can be deleted with the 2code{del()} metode. From the function @code{demo_ex6_generate_trap()}
+in @file{demo_attribute.cxx} it should be easy to see how this works.
+
+This function is called from ICLI, so doing
+@verbatim
+ # demo ex6 set 3 21
+ # demo ex6 set 3 22
+ # demo ex6 del 3
+@end verbatim
+will create a row with index 3 and value 21 in attr1. This will also emit a add trap. The
+second command will change the value of the newly create row and emit a modification trap. Finally
+the last command will delete the row and emit a delete trap.
+
+@section Implementation of DemoEx7
+This is an example of a read/write/add/delete table. The definition of @code{DemoEx7} in @file{demo_serializer.hxx}
+shows, that there are a function pointers for @code{add}, @code{del} and @code{def} in addition to the @code{get},
+@code{set} and @code{itr} function we have seen i earlier examples
+
+In @file{demo_mib.cxx} @code{_demo_ex7} is defined, and it has an OID for the table and one for a table row editor.
+In SNMP the table looks like this
+@verbatim
+  status -+- Table(70) -- Entry -+- index(1)
+          |                      +- attr1(2)
+          |                      +- attr2(3)
+          |                      +- action(123)
+          |
+          +- TableRowEditor(71) -+- index(1)
+                                 +- attr1(2)
+                                 +- attr2(3)
+                                 +- action(123)
+@end verbatim
+The actual table is under @code{Table}. As can be seen, there is an extra element, namely @code{action}.
+This action is of type @code{VTSSRowEditorState} and is defined in @file{VTSS-TC.mib} where a description
+of the functionality of this field can be found too.
+@subsection Specifying the OID
+The OID of the diffenrent elements are specified in 3 places. The 70 and 71 are specified in the definition of
+@code{_demo_ex7} in @file{demo_mib.cxx}.
+
+The 1, 2 and 3 for the attributes are in @file{demo_serializer.hxx}.
+For example the OID of @code{attr1} and @code{attr2} are specified in @code{VTSS_EXPOSE_SERIALIZE_ARG_2()} in the
+definition of @code{DemoEx7} to begin at 2 by the @code{OidOffset(2)}. In the associated @code{serialize()} function
+it can be seen, that @code{attr1} is specified with @code{OidElementValue(0)} and @code{attr2} with @code{OidElementValue(1)}. So for @code{attr1} the OID is 2+0 and for @code{attr2} it is 2+1.
+
+Finally the @code{action} OID is 123, which is specified in the definition of @code{DemoEx7} by the
+@code{snmpRowEditorOid}.
+
+@subsection The action attribute
+The action attribute appear two places, namely in the table itself and in the row editor
+
+For the action in the table:
+When reading this action attribute, the value is always 0. If something different for 0 is written to this field,
+then the row will be deleted. E.g. the command below will delete row with index 2@footnote{i.e. the 3rd row since we count from 0}. The function @code{demo_ex7_del()} is called with @code{index=2}.
+@verbatim
+ $ snmpset -c private -v 2c <IP> 1.2.6.1.4.1.6603.1.148.1.1.70.1.123.2 u 1
+@end verbatim
+
+For the action in the row editor:
+In order to create a row, the @code{TableRowEditor} is used.
+The @code{action} at this point works as two things - a semaphore and as a command register.
+This interface is described in @file{VTSS-TC.mib}. In short a number greater than 255 must
+first be written to this attribute. There can potentially be many managers, and each manager
+should use a different ID when wanting to modify an entry.
+After writing an ID, you should read it back. If you get your number back, then the row editor
+is yours and you can write to the other attributes - in our case @code{index}, @code{attr1} and @code{attr2}.
+When you are done write COMMIT-ACTION, i.e. 2 to the @code{action} attribute. The @code{demo_add_ex7()} function
+is called and after that the @code{demo_def_ex7()} to default the attributes in the row editor again.
+
+If you instead of COMMIT-ACTION(2) write CLEAR-ACTION(1), then only the @code{demo_def_ex7()} function
+is called. If you write IDLE(0), then you will release your semaphore, but changed to the row editor
+will not be used or changed. So if managers expect the row editor to have the default values when they allocate
+this resource, then you should not do that.
+
+
+@section JSON interface
+The JSON interface is similar to SNMP. Try to compare @file{demo_mip.cxx} and @file{demo_json.cxx}.
+
+It is recommended to use the @file{vson} tool to test JSON object. It can be donwloaded for git
+@verbatim
+ $ git clone https://github.com/vtss/json-rpc-util.git
+@end verbatim
+The first thing to do when using this tool is to download the JSON specification from the target.
+This is done with@footnote{The <IP> is the IP address of the target.}
+@verbatim
+ $ ./vson -d <IP> -c update-spec
+@end verbatim
+which will create the file @file{.vtss-json-rpc.spec} in the root of your home directory.
+In order to find the methods for this demo project you can say
+@verbatim
+ $ ./vson -d <IP> -c grep demo
+@end verbatim
+and you'll get something like this
+@verbatim
+ demo.something.simple_ex1.get
+ demo.something.simple_ex1.set
+ demo.something.notif_ex2.get
+ demo.something.table_ex3.get
+ demo.something.table_ex3.get
+ demo.something.table_ex3.set
+ demo.something.table_ex4.get
+ demo.something.table_ex4.get
+ demo.something.table_ex4.set
+ demo.something.table_ex5.get
+ demo.something.table_ex5.get
+ demo.something.table_ex5.set
+ demo.something.table_ex6.get
+ demo.something.table_ex6.get
+ demo.something.table_ex7.get
+ demo.something.table_ex7.get
+ demo.something.table_ex7.set
+ demo.something.table_ex7.add
+ demo.something.table_ex7.del
+@end verbatim
+There is at least one get method for each object, and one of these do not take any argument.
+For Ex1 there is only one get method which do not take any argument.
+@verbatim
+ $ ./vson  -d <IP>  -c call demo.something.simple_ex1.get
+ Calling demo.something.simple_ex1.get:
+     Attr1: false
+     Attr2:     0
+@end verbatim
+For tables there are two get methods; one that does not take any argument and will get the entire table, and another that
+take the table index as a parameter and will get you that row.
+
+In order to figure out how to set the attribute, it is suggested that you dump the json request in the above get
+command, i.e.
+@verbatim
+ $ ./vson  -d <IP>  -c call --dump-response demo.something.simple_ex1.get
+ Calling demo.something.simple_ex1.get:
+   Post-body: {"id":"jsonrpc","error":null,"result":{"Attr1":false,"Attr2":0}}
+     Attr1: false
+     Attr2:     0
+@end verbatim
+The result object reveale howto set this attrhbute
+@verbatim
+ $ ./vson  -d <IP> -c call  demo.something.simple_ex1.set \
+                              '{"Attr1":true,"Attr2":34}'
+ {"Attr1":true,"Attr2":34}
+ Calling demo.something.simple_ex1.set:
+@end verbatim
+
+In order to get table Ex5 say:
+@verbatim
+ $ ./vson  -d <IP>  -c call demo.something.table_ex5.get
+ Calling demo.something.table_ex5.get:
+     key       Attr1_Ex5 Attr2_Ex5 
+     --------- --------- --------- 
+     [0, 0, 0]         0         0 
+     [0, 0, 1]         0         1 
+    ...
+     [5, 5, 4]        10         9 
+     [5, 5, 5]        10        10 
+@end verbatim
+In order to get one row say
+@verbatim
+ $ ./vson  -d <IP>  -c call demo.something.table_ex5.get 1 2 3
+@end verbatim
+which will use the other get method available for this example.
+A set operation looks like this
+@verbatim
+ $ ./vson  -d <IP>  -c call demo.something.table_ex5.set 1 2 3 \
+                               '{"Attr1_Ex5":4,"Attr2_Ex5":5}'
+@end verbatim
+
+In Ex4, the @code{ifIndex} is used as an index. In JSON this is a string:
+@verbatim
+ $ ./vson  -d <IP>  -c call demo.something.table_ex4.get "Gi 1/1"
+@end verbatim
+
+@section JSON notification
+Just like we have SNMP traps, we have JSON notifications. In order for
+a notification to be sent, it must be enabled.
+In order to enable notifications for Ex2 give the following
+ICLI commands:
+@verbatim
+ # configure terminal
+ (config)# json notification host mydemo
+ (config-json-noti-host)# url http://a.b.c.d:5000
+ (config-json-noti-host)# exit
+ (config)# json notification listen demo.something.notif_ex2.update mydemo
+@end verbatim
+and then on machine with IP address @code{a.b.c.d} start the listner:
+@verbatim
+ $ ./listen -p 5000
+@end verbatim
+Now you can test it by changing the Ex2 attribute as described earlier.
