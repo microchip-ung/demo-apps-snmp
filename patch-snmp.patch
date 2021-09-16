@@ -11,22 +11,22 @@ index fbaff9c..fd587a7 100644
  # DefineTargetByPackage($1,$2)
  # $1: package name
 diff --git a/vtss_appl/include/vtss/appl/module_id.h b/vtss_appl/include/vtss/appl/module_id.h
-index 02620be..7bc4acab 100644
+index 8aaa077..f6c299c 100644
 --- a/vtss_appl/include/vtss/appl/module_id.h
 +++ b/vtss_appl/include/vtss/appl/module_id.h
-@@ -212,6 +212,7 @@ enum {
+@@ -211,6 +211,7 @@ enum {
+     VTSS_MODULE_ID_FRR_OSPF6            = 156,
      VTSS_MODULE_ID_FRER                 = 157,
      VTSS_MODULE_ID_KR                   = 158,
-     VTSS_MODULE_ID_IEC_MRP              = 159,
-+    VTSS_MODULE_ID_DEMO_SNMP            = 160,
++    VTSS_MODULE_ID_DEMO_SNMP            = 159,
  
      /*
       * INSERT NEW MODULE IDS HERE. AND ONLY HERE!!!
 diff --git a/vtss_appl/main/main.cxx b/vtss_appl/main/main.cxx
-index b2ec0df..d2b0fb5 100644
+index 80df25c..ad62a14 100644
 --- a/vtss_appl/main/main.cxx
 +++ b/vtss_appl/main/main.cxx
-@@ -476,6 +476,10 @@
+@@ -472,6 +472,10 @@
  #include "vtss_optional_modules_api.h"
  #endif
  
@@ -37,7 +37,7 @@ index b2ec0df..d2b0fb5 100644
  #if defined(CYGPKG_IO_FILEIO) && defined(CYGPKG_FS_RAM) && defined(VTSS_SW_OPTION_ICFG)
  #include <unistd.h>
  #include <cyg/fileio/fileio.h>
-@@ -902,6 +906,9 @@ static struct {
+@@ -895,6 +899,9 @@ static struct {
  #ifdef VTSS_SW_OPTION_PSFP
      INITFUN(psfp_init)
  #endif
@@ -48,26 +48,22 @@ index b2ec0df..d2b0fb5 100644
  // **** NOTE: vtss_icfg_late_init must be last in this list ****
  #ifdef VTSS_SW_OPTION_ICFG
 diff --git a/vtss_appl/util/vtss_module_id.cxx b/vtss_appl/util/vtss_module_id.cxx
-index e74c260..dc53567 100644
+index 2493e40..45382b6 100644
 --- a/vtss_appl/util/vtss_module_id.cxx
 +++ b/vtss_appl/util/vtss_module_id.cxx
-@@ -191,6 +191,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
+@@ -190,6 +190,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
+     [VTSS_MODULE_ID_FRR_OSPF6]             /* 156 */ = "FRR_OSPF6",
      [VTSS_MODULE_ID_FRER]                  /* 157 */ = "FRER",
      [VTSS_MODULE_ID_KR]                    /* 158 */ = "KR",
-     [VTSS_MODULE_ID_IEC_MRP]               /* 159 */ = "IEC_MRP",
-+    [VTSS_MODULE_ID_DEMO_SNMP]             /* 160 */ = "DEMO_SNMP",
++    [VTSS_MODULE_ID_DEMO_SNMP]             /* 159 */ = "DEMO_SNMP",
  
      /* Add new module name above it. And please don't use space
         in module name, use underscore instead. */
-@@ -541,6 +542,11 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
+@@ -539,6 +540,7 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
+     /*[VTSS_MODULE_ID_FRR_OSPF6]             156 */ 1,
      /*[VTSS_MODULE_ID_FRER]                  157 */ 1,
      /*[VTSS_MODULE_ID_KR]                    158 */ 1,
-     /*[VTSS_MODULE_ID_IEC_MRP]               159 */ 1,
-+#ifdef VTSS_SW_OPTION_DEMO_SNMP
-+    /*[VTSS_MODULE_ID_DEMO_SNMP]             160 */ 0,
-+#else
-+    /*[VTSS_MODULE_ID_DEMO_SNMP]             160 */ 1,
-+#endif
++    /*[VTSS_MODULE_ID_DEMO_SNMP]             159 */ 1,
  
      /* Hint:
       * For a new module, if the module needs an independent privilege level group
