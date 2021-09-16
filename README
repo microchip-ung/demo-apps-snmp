@@ -14,7 +14,7 @@ To make life easy, generate tags, i.e., 'make TAGS'. Then you have tags for the 
 editor. That will be useful in the following.
 
 
-Build simple application:
+Build application:
 -------------------------
 (Note: The patch 'patch-snmp.patch' contain the changes that need to be done
 in the 2021.06 WebStaX file tree (item 2,3,4 below). The changes are described below,
